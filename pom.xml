@@ -73,14 +73,14 @@
     <distributionManagement>
         <repository>
             <id>github</id>
-            <url>https://maven.pkg.github.com/coursar/demo-maven</url>
+            <url>https://maven.pkg.github.com/mironovNN/McdonaldsService</url>
         </repository>
     </distributionManagement>
 
     <repositories>
         <repository>
             <id>github</id>
-            <url>https://maven.pkg.github.com/coursar/demo-maven</url>
+            <url>https://maven.pkg.github.com/mironovNN/McdonaldsService</url>
         </repository>
     </repositories>
 
