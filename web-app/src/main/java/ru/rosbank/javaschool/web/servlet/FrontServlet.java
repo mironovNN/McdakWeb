@@ -17,22 +17,14 @@ import javax.servlet.http.HttpSession;
 import javax.sql.DataSource;
 import java.io.IOException;
 
-// 1. Instantiation
-// 2. init
-// 3. service
-// 4. destroy (уничтожение)
-
-// Singleton'ы - Servlet*
 public class FrontServlet extends HttpServlet {
   private BurgerUserService burgerUserService;
   private BurgerAdminService burgerAdminService;
 
-  // Ctrl + O
   @Override
   public void init() throws ServletException {
     log("Init");
-    // Lookup - самостоятельно ищем зависимости
-    // JNDI
+
     try {
       // TODO: неплохо бы: чтобы это было автоматически
       InitialContext initialContext = new InitialContext();
@@ -51,18 +43,22 @@ public class FrontServlet extends HttpServlet {
   }
 
   private void insertInitialData(ProductRepository productRepository) {
-    productRepository.save(new ProductModel(0, "Burger 1", 100, 1, null));
-    productRepository.save(new ProductModel(0, "Burger 2", 200, 2, null));
+
+    productRepository.save(new ProductModel(0, "BigMak", 200, 1, "https://commerage.ru/img/xo/740x480/5/hp33oegsGEOcokWZw6LL-YDDY2iP8sr9.jpg"));
+    productRepository.save(new ProductModel(0, "ChessBurger", 120, 1, "https://commerage.ru/img/xo/740x480/5/hp33oegsGEOcokWZw6LL-YDDY2iP8sr9.jpg"));
+    productRepository.save(new ProductModel(0, "ChickBurger", 170, 1, "https://commerage.ru/img/xo/740x480/5/hp33oegsGEOcokWZw6LL-YDDY2iP8sr9.jpg"));
+    productRepository.save(new ProductModel(0, "French Fry", 100, 1, "https://n1s2.hsmedia.ru/48/83/b2/4883b26ba5458ae653f1955dbe5a4f8e/620x412_1_e6e85d9d54d3c4b1544fab803374958b@800x531_0x59f91261_9474578641381418343.jpeg"));
+    productRepository.save(new ProductModel(0, "Coca-cola", 100, 1, "https://pimg.mycdn.me/getImage?disableStub=true&type=VIDEO_S_720&url=http%3A%2F%2Fi.ytimg.com%2Fvi%2Fr7eYj0fSG3M%2F0.jpg&signatureToken=ChD_uOM6Hd4yxLJa3NElQw"));
+    productRepository.save(new ProductModel(0, "Fanta", 100, 1, "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-yvwkIlwVHaORAJdblM-2Ai3ZKC4VeDrF5jK1MLtQm6LU7QuZ&s"));
+
   }
 
   @Override
   protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-    // будем перенаправлять запрос
-    // resp.getWriter().write("...");
+
     String rootUrl = req.getContextPath().isEmpty() ? "/" : req.getContextPath();
     String url = req.getRequestURI().substring(req.getContextPath().length());
-    // routing
-    // в зависимости от url'а вызывать нужные обработчики
+
     if (url.startsWith("/admin")) {
       if (url.equals("/admin")) {
         // TODO: work with admin panel
@@ -73,12 +69,13 @@ public class FrontServlet extends HttpServlet {
         }
 
         if (req.getMethod().equals("POST")) {
-          // getParameter - POST (BODY FORM)
+
           int id = Integer.parseInt(req.getParameter("id"));
           String name = req.getParameter("name");
           int price = Integer.parseInt(req.getParameter("price"));
           int quantity = Integer.parseInt(req.getParameter("quantity"));
-          // TODO: validation
+          String imageUrl = req.getParameter("imageUrl");
+
           burgerAdminService.save(new ProductModel(id, name, price, quantity, null));
           resp.sendRedirect(url);
           return;
@@ -87,7 +84,7 @@ public class FrontServlet extends HttpServlet {
 
       if (url.startsWith("/admin/edit")) {
         if (req.getMethod().equals("GET")) {
-          // ?id=value
+
           int id = Integer.parseInt(req.getParameter("id"));
           req.setAttribute(Constants.ITEM, burgerAdminService.getById(id));
           req.setAttribute(Constants.ITEMS, burgerAdminService.getAll());
@@ -109,6 +106,7 @@ public class FrontServlet extends HttpServlet {
         }
 
         int orderId = (Integer) session.getAttribute("order-id");
+        req.setAttribute("totalPrice", burgerUserService.totalPrice());
         req.setAttribute("ordered-items", burgerUserService.getAllOrderPosition(orderId));
         req.setAttribute(Constants.ITEMS, burgerUserService.getAll());
         req.getRequestDispatcher("/WEB-INF/frontpage.jsp").forward(req, resp);
@@ -130,10 +128,24 @@ public class FrontServlet extends HttpServlet {
         return;
       }
     }
+
+    if(url.startsWith("/del")){
+      delService(req, resp, url);
+    }
   }
 
   @Override
   public void destroy() {
     log("destroy");
+  }
+
+  protected void delService(HttpServletRequest req, HttpServletResponse resp, String url) throws ServletException, IOException {
+    if (req.getMethod().equals("GET")){
+      int id = Integer.parseInt(req.getParameter("id"));
+      burgerUserService.getById(id);
+      resp.sendRedirect("/");
+      return;
+
+    }
   }
 }

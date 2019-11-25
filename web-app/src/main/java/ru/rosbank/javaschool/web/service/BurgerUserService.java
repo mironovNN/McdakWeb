@@ -48,4 +48,19 @@ public class BurgerUserService {
   public List<OrderPositionModel> getAllOrderPosition(int orderId) {
       return orderPositionRepository.getAllByOrderId(orderId);
   }
+
+  public void delById(int id) {
+    orderPositionRepository.removeById(id);
+  }
+
+  public int totalPrice(){
+    List<OrderPositionModel> all = orderPositionRepository.getAll();
+    int sum = 0;
+    for(OrderPositionModel orderPositionModel : all){
+      sum +=(orderPositionModel.getProductPrice() * orderPositionModel.getProductQuantity());
+    }
+    return sum;
+  }
+
+
 }
